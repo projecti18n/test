@@ -78,4 +78,4 @@ async function addNodes(language, name) {
             await session.close();
         }
     }
-}();
+};
