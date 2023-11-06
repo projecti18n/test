@@ -1,13 +1,80 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Node + Express + MongoDb example</title>
-  </head>
-  <body>
-    <h1>Node + Express + MongoDb example</h1>
-    <p id="counter">Loading button click data.3</p>
-    <button id="myButton">Click me!</button>
-  </body>
-  <script src="client.js"></script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry Form</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Data Entry Form</h1>
+
+<table id="dataEntry">
+    <tr>
+        <th>Language</th>
+        <th>Name</th>
+    </tr>
+    <!-- Initial 10 rows -->
+    <tr>
+        <td><input type="text" name="language[]" /></td>
+        <td><input type="text" name="name[]" /></td>
+    </tr>
+    <!-- Add 9 more rows using JavaScript -->
+</table>
+
+<button onclick="addLines()">Add lines</button>
+<button onclick="submitData()">Submit data</button>
+
+<script>
+    function addLines() {
+        var table = document.getElementById("dataEntry");
+        for (var i = 0; i < 9; i++) {
+            var row = table.insertRow(table.rows.length);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            cell1.innerHTML = '<input type="text" name="language[]" />';
+            cell2.innerHTML = '<input type="text" name="name[]" />';
+        }
+    }
+
+    function submitData() {
+        var data = [];
+        var table = document.getElementById("dataEntry");
+
+        for (var i = 1; i < table.rows.length; i++) {
+            var language = table.rows[i].cells[0].getElementsByTagName("input")[0].value;
+            var name = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
+            data.push(language, name);
+        }
+
+        ProcessData(data);
+    }
+
+    function ProcessData(data) {
+        var index = 0;
+        while (index < data.length) {
+            var language = data[index];
+            var name = data[index + 1];
+            // Call external script
+            addNodes(language, name);
+            index += 2;
+        }
+    }
+</script>
+
+<script src="addnodes.js"></script>
+
+</body>
 </html>
