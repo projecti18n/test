@@ -79,3 +79,4 @@ async function addNodes(language, name) {
         }
     }
 };
+// <script src="addnodes.js"></script>
