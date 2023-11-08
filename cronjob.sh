@@ -6,4 +6,5 @@ rm -r /tmp/*
 cd /var/www/
 pkill -f node
 npm install express
+node webserver.js
 node addnodes.js
