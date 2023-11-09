@@ -7,7 +7,7 @@ const hostname = '185.194.239.31';
 const port = 8080;
 
 // serve files from the public directory
-app.use(express.static('public'));
+app.use(express.static('/var/www/'));
 
 // start the express web server listening on 8080
 app.listen(8080, () => {
