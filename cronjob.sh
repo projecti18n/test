@@ -10,4 +10,6 @@ cd
 cp node_modules var/www/node_modules -r
 cd /var/www/
 node webserver.js
-node addnodes.js
+cp addnodes.js ~/
+cp addnodestest.js ~/
+cp addnodestest2.js ~/
