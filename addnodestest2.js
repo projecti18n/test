@@ -15,7 +15,7 @@ driver.verifyConnectivity()
 const session = driver.session({ database: 'neo4j' })
 
 session.run(
-    'MERGE (p1:Person { name: 'alice' }-[:KNOWS]->(p2:Person { name: 'bob' }'
+    'MERGE (p1:Person { name: 'alice' }-[:KNOWS]->(p2:Person { name: 'bob' })'
     )
     .subscribe({
         onKeys: keys => {
