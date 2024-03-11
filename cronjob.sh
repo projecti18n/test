@@ -9,7 +9,7 @@ npm install express
 cd
 cp node_modules var/www/node_modules -r
 cd /var/www/
-node webserver.js
 cp addnodes.js ~/
 cp addnodestest.js ~/
 cp addnodestest2.js ~/
+node webserver.js
