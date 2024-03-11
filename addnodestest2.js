@@ -20,7 +20,7 @@ session.run('MERGE (p1:Person)-[:KNOWS]->(p2:Person)')
             console.log(keys)
         },
         onNext: record => {
-            console.log(record.get('n').properties.title)
+            console.log(record.get('p1').properties.title)
         },
         onCompleted: () => {
             session.close()
