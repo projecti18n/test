@@ -15,7 +15,7 @@ driver.verifyConnectivity()
 
 const session = driver.session({ database: 'neo4j' })
 
-session.run('MATCH (n:Movie) RETURN n LIMIT 5')
+session.run('MERGE (p1:Person)-[:KNOWS]->(p2:Person)')
     .subscribe({
         onKeys: keys => {
             console.log(keys)

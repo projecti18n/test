@@ -14,7 +14,20 @@ driver.verifyConnectivity()
 
 const session = driver.session({ database: 'neo4j' })
 
-session.run('MERGE (p1:Person)-[:KNOWS]->(p2:Person)')
+session.run('(charlie:Person {name: 'Charlie Sheen', bornIn: 'New York', chauffeurName: 'John Brown'}),
+(martin:Person {name: 'Martin Sheen', bornIn: 'Ohio', chauffeurName: 'Bob Brown'}),
+(michael:Person {name: 'Michael Douglas', bornIn: 'New Jersey', chauffeurName: 'John Brown'}),
+(oliver:Person {name: 'Oliver Stone', bornIn: 'New York', chauffeurName: 'Bill White'}),
+(rob:Person {name: 'Rob Reiner', bornIn: 'New York', chauffeurName: 'Ted Green'}),
+(wallStreet:Movie {title: 'Wall Street'}),
+(theAmericanPresident:Movie {title: 'The American President'}),
+(charlie)-[:ACTED_IN]->(wallStreet),
+(martin)-[:ACTED_IN]->(wallStreet),
+(michael)-[:ACTED_IN]->(wallStreet),
+(martin)-[:ACTED_IN]->(theAmericanPresident),
+(michael)-[:ACTED_IN]->(theAmericanPresident),
+(oliver)-[:DIRECTED]->(wallStreet),
+(rob)-[:DIRECTED]->(theAmericanPresident)')
     .subscribe({
         onKeys: keys => {
             console.log(keys)
