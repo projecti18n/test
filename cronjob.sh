@@ -7,7 +7,7 @@ cd /var/www/
 pkill -f node
 npm install express
 cd
-cp node_modules var/www/node_modules -r
+cp node_modules /var/www/node_modules -r
 cd /var/www/
 cp addnodes.js ~/
 cp addnodestest.js ~/

@@ -16,8 +16,7 @@ const session = driver.session({ database: 'neo4j' })
 
 const person1Name = 'Alice';
 const person2Name = 'Bob';
-
-session.run('MERGE (p1:test4 {name:$person1Name, age:111})-[:KNOWS]->(p2:test4{name:$person2Name, age:222 })')
+session.run('MERGE (p1:test4 {name:$person1Name, age:111})-[:KNOWS]->(p2:test4{name:$person2Name, age:222 })', { person1Name, person2Name })
     .subscribe({
         onKeys: keys => {
             console.log(keys)
