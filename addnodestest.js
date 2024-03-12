@@ -1,3 +1,4 @@
+async function addNodes(name1, name2) {
 const neo4j = require('neo4j-driver')
 
 const cnx = {
@@ -7,7 +8,6 @@ const cnx = {
 }
 
 const driver = neo4j.driver(cnx.uri, neo4j.auth.basic(cnx.user, cnx.password))
-
 driver.verifyConnectivity()
     .then((cnxMsg) => {
         console.log(cnxMsg)
@@ -15,13 +15,15 @@ driver.verifyConnectivity()
 
 const session = driver.session({ database: 'neo4j' })
 
-session.run('MERGE (p1:Person)-[:KNOWS]->(p2:Person)')
+const person1Name = name1;
+const person2Name = name2;
+session.run('MERGE (p1:test4 {name:$person1Name, age:111})-[:KNOWS]->(p2:test4{name:$person2Name, age:222 })', { person1Name, person2Name })
     .subscribe({
         onKeys: keys => {
             console.log(keys)
         },
         onNext: record => {
-            console.log(record.get('n').properties.title)
+            console.log(record.get('p1').properties.title)
         },
         onCompleted: () => {
             session.close()
@@ -30,3 +32,4 @@ session.run('MERGE (p1:Person)-[:KNOWS]->(p2:Person)')
             console.error(error) 
         }
     })
+  }

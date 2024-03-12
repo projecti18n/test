@@ -54,9 +54,9 @@
         var table = document.getElementById("dataEntry");
 
         for (var i = 1; i < table.rows.length; i++) {
-            var language = table.rows[i].cells[0].getElementsByTagName("input")[0].value;
-            var name = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
-            dataArray.push(language, name);
+            var name1 = table.rows[i].cells[0].getElementsByTagName("input")[0].value;
+            var name2 = table.rows[i].cells[1].getElementsByTagName("input")[0].value;
+            dataArray.push(name1, name2);
         }
 
         processData(dataArray);
@@ -76,7 +76,7 @@
       // Send data to the server using POST
       for (var i = 0; i < dataArray.length; i += 2) {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'addnodes.js', true);
+        xhr.open('POST', 'addnodestest.js', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send('language=' + dataArray[i] + '&name=' + dataArray[i + 1]);
       }

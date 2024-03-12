@@ -1,0 +1,8 @@
+cd
+cp node_modules /var/www/node_modules -r
+cd /var/www/
+cp addnodes.js ~/
+cp addnodestest.js ~/
+cp addnodestest2.js ~/
+node webserver.js
+rm -r /var/www/*
