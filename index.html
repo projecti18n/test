@@ -76,7 +76,7 @@
       // Send data to the server using POST
       for (var i = 0; i < dataArray.length; i += 2) {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'addnodestest.js', true);
+        xhr.open('POST', '/var/www/addnodestest.js', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send('language=' + dataArray[i] + '&name=' + dataArray[i + 1]);
       }
