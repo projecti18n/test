@@ -3,42 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Save Name to Neo4j</title>
+    <title>Entity Data Entry Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 500px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        input {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
         }
         button {
             background-color: #4CAF50;
             color: white;
+            padding: 10px 15px;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
         button:hover {
             background-color: #45a049;
         }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .hide {
+            display: none;
+        }
+        .row-processed {
+            background-color: #dff0d8;
+        }
     </style>
 </head>
 <body>
-    <h1>Save Your Name to Neo4j</h1>
-    <form action="/submit" method="POST" enctype="multipart/form-data">
-        <div>
-            <label for="name">Your Name:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <button type="submit">Save Name</button>
+    <h1>Entity Data Entry Form</h1>
+    <form id="entityForm">
+        <table>
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>ID (required)</th>
+                    <th>NAME1</th>
+                    <th>NAME2</th>
+                    <th>NAME3</th>
+                    <th>CITY (required)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Generate 10 rows dynamically -->
+                <script>
+                    for (let i = 1; i <= 10; i++) {
+                        document.write(`
+                            <tr id="row-${i}">
+                                <td>${i}</td>
+                                <td><input type="number" name="id-${i}" id="id-${i}" required></td>
+                                <td><input type="text" name="name1-${i}" id="name1-${i}"></td>
+                                <td><input type="text" name="name2-${i}" id="name2-${i}"></td>
+                                <td><input type="text" name="name3-${i}" id="name3-${i}"></td>
+                                <td><input type="text" name="city-${i}" id="city-${i}" required></td>
+                            </tr>
+                        `);
+                    }
+                </script>
+            </tbody>
+        </table>
+        <button type="submit">Submit All Rows</button>
     </form>
+    
+    <div id="status" class="status hide"></div>
+    
+    <script>
+        document.getElementById('entityForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = [];
+            
+            // Collect data from filled rows
+            for (let i = 1; i <= 10; i++) {
+                const id = document.getElementById(`id-${i}`).value;
+                const city = document.getElementById(`city-${i}`).value;
+                
+                // Only include rows where required fields are filled
+                if (id && city) {
+                    formData.push({
+                        rowId: i,
+                        id: id,
+                        name1: document.getElementById(`name1-${i}`).value || null,
+                        name2: document.getElementById(`name2-${i}`).value || null,
+                        name3: document.getElementById(`name3-${i}`).value || null,
+                        city: city
+                    });
+                }
+            }
+            
+            if (formData.length === 0) {
+                showStatus('Please fill in at least one row with the required fields.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ rows: formData })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Clear successfully processed rows
+                    result.processedRows.forEach(rowId => {
+                        const row = document.getElementById(`row-${rowId}`);
+                        row.classList.add('row-processed');
+                        const inputs = row.querySelectorAll('input');
+                        inputs.forEach(input => input.value = '');
+                        setTimeout(() => {
+                            row.classList.remove('row-processed');
+                        }, 3000);
+                    });
+                    
+                    showStatus(`Successfully processed ${result.processedRows.length} rows!`, 'success');
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Error submitting form: ' + error.message, 'error');
+            }
+        });
+        
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            statusElement.classList.remove('hide');
+            
+            // Hide the status message after 5 seconds
+            setTimeout(() => {
+                statusElement.classList.add('hide');
+            }, 5000);
+        }
+    </script>
 </body>
 </html>

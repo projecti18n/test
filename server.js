@@ -2,7 +2,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { IncomingForm } = require('formidable');
 const neo4j = require('neo4j-driver');
 
 // Neo4j connection configuration
@@ -32,68 +31,108 @@ const server = http.createServer((req, res) => {
     else if (req.method === 'POST' && req.url === '/submit') {
         console.log('Form submission received');
         
-        // Create new form instance
-        const form = new IncomingForm({ keepExtensions: true });
+        // Get the request body data
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
         
-        // Parse the form
-        form.parse(req, async (err, fields, files) => {
-            if (err) {
-                console.error('Form parsing error:', err);
-                res.writeHead(500);
-                res.end('Error parsing form data');
-                return;
-            }
-            
-            console.log('Form fields received:', fields);
-            // Handle formidable v4+ or v3- format
-            const name = fields.name?.[0] || fields.name;
-            
-            if (!name) {
-                console.error('No name field found in submission');
-                res.writeHead(400);
-                res.end('Name field is required');
-                return;
-            }
-            
+        req.on('end', async () => {
             try {
-                // Save name to Neo4j
+                // Parse the JSON data
+                const formData = JSON.parse(body);
+                const rows = formData.rows || [];
+                
+                console.log(`Received ${rows.length} rows of data`);
+                
+                // Process each row in the Neo4j database
+                const processedRows = [];
                 const session = driver.session();
+                
                 try {
-                    console.log(`Saving name "${name}" to Neo4j`);
-                    const result = await session.run(
-                        'CREATE (p:Person {name: $nameParam}) RETURN p',
-                        { nameParam: name }
-                    );
+                    for (const row of rows) {
+                        console.log(`Processing row ${row.rowId}:`, row);
+                        
+                        // Only process if minimum required fields are present
+                        if (!row.id || !row.city) {
+                            console.warn(`Row ${row.rowId} missing required fields`);
+                            continue;
+                        }
+                        
+                        // Build the Cypher query dynamically based on which name fields are present
+                        let query = `
+                            MERGE (id:ID {name: $id})
+                        `;
+                        
+                        // Only add NAME1 node and relationship if it exists
+                        if (row.name1) {
+                            query += `
+                                MERGE (name1:NAME {name: $name1})
+                                MERGE (id)-[:IS]->(name1)
+                            `;
+                        }
+                        
+                        // Only add NAME2 node and relationship if it exists
+                        if (row.name2) {
+                            query += `
+                                MERGE (name2:NAME {name: $name2})
+                                MERGE (id)-[:IS]->(name2)
+                            `;
+                        }
+                        
+                        // Only add NAME3 node and relationship if it exists
+                        if (row.name3) {
+                            query += `
+                                MERGE (name3:NAME {name: $name3})
+                                MERGE (id)-[:IS]->(name3)
+                            `;
+                        }
+                        
+                        // Add CITY node and relationship
+                        query += `
+                            MERGE (city:CITY {name: $city})
+                            MERGE (id)-[:IN]->(city)
+                            RETURN id, city
+                        `;
+                        
+                        // Execute the query with parameters
+                        const result = await session.run(query, {
+                            id: row.id.toString(),
+                            name1: row.name1 || '',
+                            name2: row.name2 || '',
+                            name3: row.name3 || '',
+                            city: row.city
+                        });
+                        
+                        console.log(`Successfully processed row ${row.rowId}`);
+                        processedRows.push(row.rowId);
+                    }
                     
-                    // Get the created node
-                    const createdNode = result.records[0].get('p');
-                    console.log('Node created successfully:', createdNode);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        processedRows: processedRows,
+                        message: `Successfully processed ${processedRows.length} rows.`
+                    }));
                     
-                    res.writeHead(200, { 'Content-Type': 'text/html' });
-                    res.end(`
-                        <html>
-                            <head>
-                                <title>Success</title>
-                                <style>
-                                    body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
-                                    .success { color: green; }
-                                    a { display: inline-block; margin-top: 20px; }
-                                </style>
-                            </head>
-                            <body>
-                                <h1 class="success">Success!</h1>
-                                <p>Name "${name}" has been saved to the Neo4j database.</p>
-                                <a href="/">Submit another name</a>
-                            </body>
-                        </html>
-                    `);
+                } catch (dbError) {
+                    console.error('Database operation error:', dbError);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: false,
+                        error: `Database error: ${dbError.message}`
+                    }));
                 } finally {
                     await session.close();
                 }
-            } catch (error) {
-                console.error('Database error:', error);
-                res.writeHead(500);
-                res.end('Error saving to database: ' + error.message);
+                
+            } catch (parseError) {
+                console.error('Error parsing JSON:', parseError);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    error: 'Invalid JSON data'
+                }));
             }
         });
     } else {
