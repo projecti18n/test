@@ -1,9 +1,9 @@
 async function addNodes(language, name) {
     const neo4j = require('neo4j-driver');
 
-    const uri = 'neo4j+s://8b9860e8.databases.neo4j.io';
+    const uri = 'neo4j+s://4ce43095.databases.neo4j.io';
     const user = 'neo4j';
-    const password = 'let65HsoNU6NkanRlMPUNSJcbQoRy_cGxwKVOXe_GO4';
+    const password = '2ZuptZocIcO8_QoiE_mBRSpV-80vkKMoI0qjteVL-K0';
     
     // To learn more about the driver: https://neo4j.com/docs/javascript-manual/current/client-applications/#js-driver-driver-object
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
